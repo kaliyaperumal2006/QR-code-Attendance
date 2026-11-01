@@ -3,10 +3,14 @@ const qrService = require("../services/qrService");
 const { requireUuid, requireFields } = require("../utils/asyncHandler");
 
 /**
- * Derive the base URL from the incoming request.
- * Works on localhost, Vercel, or any deployment — no config needed.
+ * Derive the base URL from the environment variable (if specified) or incoming request.
+ * Allows setting BASE_URL (e.g. LAN IP http://192.168.x.x:3000 or domain) so QR codes
+ * work for student phones even if teacher accesses dashboard via localhost.
  */
 function baseUrl(req) {
+  if (process.env.BASE_URL && process.env.BASE_URL.trim() !== "") {
+    return process.env.BASE_URL.trim().replace(/\/+$/, "");
+  }
   const protocol = req.get("x-forwarded-proto") || req.protocol;
   const host = req.get("host");
   return `${protocol}://${host}`;

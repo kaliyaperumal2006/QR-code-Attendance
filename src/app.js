@@ -10,6 +10,7 @@ const sessionRoutes = require("./routes/sessionRoutes");
 const attendanceRoutes = require("./routes/attendanceRoutes");
 const app = express();
 const PORT = Number(process.env.PORT) || 3000;
+const HOST = process.env.HOST || "0.0.0.0";
 
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
@@ -83,12 +84,13 @@ app.use((err, req, res, next) => {
   });
 });
 
-// Export for Vercel serverless
-module.exports = app;
-
-// Only listen when running locally (not on Vercel)
-if (process.env.NODE_ENV !== "production" || !process.env.VERCEL) {
-  app.listen(PORT, () => {
-    console.log(`QR attendance running on http://localhost:${PORT}`);
+if (require.main === module || !process.env.VERCEL) {
+  app.listen(PORT, HOST, () => {
+    console.log(`QR attendance running on http://${HOST === "0.0.0.0" ? "localhost" : HOST}:${PORT}`);
+    if (process.env.BASE_URL) {
+      console.log(`QR attendance public URL: ${process.env.BASE_URL}`);
+    }
   });
 }
+
+module.exports = app;
